@@ -1,8 +1,10 @@
 import * as yup from 'yup';
 import i18n from 'i18next';
 import onChange from 'on-change';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import axios from 'axios';
-import uniqueId from 'lodash/uniqueId'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import uniqueId from 'lodash/uniqueId';
 import ru from './locales/ru.js';
 import parse from './parser.js';
 import render from './render.js';
