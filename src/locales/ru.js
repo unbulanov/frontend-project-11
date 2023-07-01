@@ -1,9 +1,8 @@
 export default {
   translation: {
-    proxy: '#',
-    feeds: '',
-    posts: '',
-    button: '',
+    feeds: 'Фиды',
+    posts: 'Посты',
+    button: 'Просмотр',
     success: 'RSS успешно загружен',
     errorNames: {
       validation: 'ValidationError',

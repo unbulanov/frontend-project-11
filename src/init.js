@@ -1,8 +1,10 @@
 import * as yup from 'yup';
 import i18n from 'i18next';
 import onChange from 'on-change';
+import axios from 'axios';
 import ru from './locales/ru.js';
 import parse from './parser.js';
+import render from './render.js';
 
 export default () => {
   const i18nInstance = i18n.createInstance();
@@ -13,6 +15,7 @@ export default () => {
     },
   });
   const state = {
+    processState: 'filling',
     fields: {
       url: '',
     },
@@ -47,13 +50,10 @@ export default () => {
     });
     schema.validate(state.fields)
       .then(() => {
-        const modifiedUrl = `${i18nInstance.t('proxy')}${encodeURIComponent(url)}`;
+        const modifiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
         return axios.get(modifiedUrl);
       })
-      .then((response) => {
-        parse(watchedState, response.data, 'new', id);
-        return id;
-      })
+      .then((response) => parse(response.data.contents))
       .then((id) => {
         watchedState.newFeedId = id;
         state.addedUrls.push(url);
