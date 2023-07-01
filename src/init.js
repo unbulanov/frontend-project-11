@@ -20,7 +20,6 @@ export default () => {
   });
 
   const state = {
-    processState: 'filling',
     fields: {
       url: '',
     },
@@ -44,8 +43,7 @@ export default () => {
     yup.setLocale({
       mixed: {
         notOneOf: i18nInstance.t('errors.addedRss'),
-        required: i18nInstance.t('errors.empty'),
-        default: i18nInstance.t('errors.invalidRss'),
+        default: 'field_invalid',
       },
       string: {
         url: i18nInstance.t('errors.invalidUrl'),

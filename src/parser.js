@@ -1,11 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import uniqueId from 'lodash/uniqueId';
 
-export default (state, response, type, currentId) => {
+export default (state, data, type, currentId) => {
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(response.contents, 'text/xml');
-    const item = doc.querySelectorAll('item');
+    const doc = parser.parseFromString(data.contents, 'text/xml');
+    const items = doc.querySelectorAll('item');
     if (type === 'new') {
       const channel = document.querySelector('channel');
       const mainTitle = channel.querySelector('title').textContent;
@@ -14,10 +14,10 @@ export default (state, response, type, currentId) => {
         id: currentId, title: mainTitle, description: mainDescription,
       });
 
-      item.forEach((items) => {
-        const title = items.querySelector('title').textContent;
-        const description = items.querySelector('description').textContent;
-        const link = items.querySelector('link').textContent;
+      items.forEach((item) => {
+        const title = item.querySelector('title').textContent;
+        const description = item.querySelector('description').textContent;
+        const link = item.querySelector('link').textContent;
         const uniqId = uniqueId();
         state.posts.push({
           feedId: currentId, id: uniqId, title, description, link,
@@ -27,8 +27,8 @@ export default (state, response, type, currentId) => {
     if (type === 'existing') {
       const existPosts = state.posts.filter(({ feedId }) => feedId === currentId);
       const existPostsTitles = existPosts.map(({ title }) => title);
-      const newPosts = Array.from(item).filter((items) => {
-        const title = items.querySelector('title').textContent;
+      const newPosts = Array.from(items).filter((item) => {
+        const title = item.querySelector('title').textContent;
         return !existPostsTitles.includes(title);
       });
       newPosts.forEach((post) => {
