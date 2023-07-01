@@ -3,9 +3,6 @@ import uniqueId from 'lodash/uniqueId';
 export default (response) => {
   const parse = new DOMParser();
   const xmlContent = parse.parseFromString(response, 'text/xml');
-  if (!xmlContent.querySelector('rss')) {
-    return null;
-  }
 
   const channel = xmlContent.querySelector('channel');
   const mainTitle = channel.querySelector('title').textContent;
