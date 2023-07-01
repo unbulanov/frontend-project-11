@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "RSS project",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/unbulanov/frontend-project-11.git"
@@ -17,6 +15,7 @@
   },
   "homepage": "https://github.com/unbulanov/frontend-project-11#readme",
   "devDependencies": {
+    "@playwright/test": "^1.35.1",
     "@webpack-cli/generators": "^3.0.7",
     "css-loader": "^6.8.1",
     "eslint": "^8.43.0",

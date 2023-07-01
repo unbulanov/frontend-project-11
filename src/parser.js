@@ -1,30 +1,31 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import uniqueId from 'lodash/uniqueId';
 
-export default (state, data, type, curFeedId) => {
+export default (state, data, type, currentId) => {
   try {
     const parser = new DOMParser();
     const document = parser.parseFromString(data.contents, 'text/xml');
     const items = document.querySelectorAll('item');
     if (type === 'new') {
-      const chaTitle = document.querySelector('channel > title').textContent;
-      const chaDescription = document.querySelector('channel > description').textContent;
+      const channel = document.querySelector('channel');
+      const mainTitle = channel.querySelector('title').textContent;
+      const mainDescription = channel.querySelector('description').textContent;
       state.feeds.push({
-        id: curFeedId, title: chaTitle, description: chaDescription,
+        id: currentId, title: mainTitle, description: mainDescription,
       });
 
       items.forEach((item) => {
         const title = item.querySelector('title').textContent;
         const description = item.querySelector('description').textContent;
         const link = item.querySelector('link').textContent;
-        const postId = uniqueId();
+        const uniqId = uniqueId();
         state.posts.push({
-          feedId: curFeedId, id: postId, title, description, link,
+          feedId: currentId, id: uniqId, title, description, link,
         });
       });
     }
     if (type === 'existing') {
-      const existingPosts = state.posts.filter(({ feedId }) => feedId === curFeedId);
+      const existingPosts = state.posts.filter(({ feedId }) => feedId === currentId);
       const existingPostsTitles = existingPosts.map(({ title }) => title);
       const newPosts = Array.from(items).filter((item) => {
         const title = item.querySelector('title').textContent;
@@ -34,12 +35,12 @@ export default (state, data, type, curFeedId) => {
         const title = post.querySelector('title').textContent;
         const description = post.querySelector('description').textContent;
         const link = post.querySelector('link').textContent;
-        const postId = uniqueId();
+        const uniqId = uniqueId();
         state.trackingPosts.push({
-          feedId: curFeedId, id: postId, title, description, link,
+          feedId: currentId, id: uniqId, title, description, link,
         });
         state.posts.push({
-          feedId: curFeedId, id: postId, title, description, link,
+          feedId: currentId, id: uniqId, title, description, link,
         });
       });
     }
