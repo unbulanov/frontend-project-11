@@ -1,46 +1,45 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import uniqueId from 'lodash/uniqueId';
 
-export default (state, data, type, currentId) => {
+export default (state, data, type, curFeedId) => {
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(data.contents, 'text/xml');
-    const items = doc.querySelectorAll('item');
+    const document = parser.parseFromString(data.contents, 'text/xml');
+    const items = document.querySelectorAll('item');
     if (type === 'new') {
-      const channel = document.querySelector('channel');
-      const mainTitle = channel.querySelector('title').textContent;
-      const mainDescription = channel.querySelector('description').textContent;
+      const chaTitle = document.querySelector('channel > title').textContent;
+      const chaDescription = document.querySelector('channel > description').textContent;
       state.feeds.push({
-        id: currentId, title: mainTitle, description: mainDescription,
+        id: curFeedId, title: chaTitle, description: chaDescription,
       });
 
       items.forEach((item) => {
         const title = item.querySelector('title').textContent;
         const description = item.querySelector('description').textContent;
         const link = item.querySelector('link').textContent;
-        const uniqId = uniqueId();
+        const postId = uniqueId();
         state.posts.push({
-          feedId: currentId, id: uniqId, title, description, link,
+          feedId: curFeedId, id: postId, title, description, link,
         });
       });
     }
     if (type === 'existing') {
-      const existPosts = state.posts.filter(({ feedId }) => feedId === currentId);
-      const existPostsTitles = existPosts.map(({ title }) => title);
+      const existingPosts = state.posts.filter(({ feedId }) => feedId === curFeedId);
+      const existingPostsTitles = existingPosts.map(({ title }) => title);
       const newPosts = Array.from(items).filter((item) => {
         const title = item.querySelector('title').textContent;
-        return !existPostsTitles.includes(title);
+        return !existingPostsTitles.includes(title);
       });
       newPosts.forEach((post) => {
         const title = post.querySelector('title').textContent;
         const description = post.querySelector('description').textContent;
         const link = post.querySelector('link').textContent;
-        const uniqId = uniqueId();
+        const postId = uniqueId();
         state.trackingPosts.push({
-          feedId: currentId, id: uniqId, title, description, link,
+          feedId: curFeedId, id: postId, title, description, link,
         });
         state.posts.push({
-          feedId: currentId, id: uniqId, title, description, link,
+          feedId: curFeedId, id: postId, title, description, link,
         });
       });
     }

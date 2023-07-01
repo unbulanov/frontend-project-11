@@ -1,13 +1,13 @@
+import onChange from 'on-change';
 import * as yup from 'yup';
 import i18n from 'i18next';
-import onChange from 'on-change';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import axios from 'axios';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import uniqueId from 'lodash/uniqueId';
 import ru from './locales/ru.js';
-import parse from './parser.js';
 import render from './render.js';
+import parser from './parser.js';
 import refresh from './refresh.js';
 
 export default () => {
@@ -59,13 +59,13 @@ export default () => {
       })
       .then((response) => {
         const id = uniqueId();
-        parse(watchedState, response.data, 'new', id);
+        parser(watchedState, response.data, 'new', id);
         return id;
       })
       .then((id) => {
         watchedState.newFeedId = id;
         state.addedUrls.push(url);
-        refresh(watchedState, url, i18nInstance, id);
+        refresh(watchedState, url, id);
       })
       .catch((err) => {
         watchedState.error = err;
