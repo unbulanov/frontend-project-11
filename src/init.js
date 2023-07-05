@@ -17,58 +17,60 @@ export default () => {
     resources: {
       ru,
     },
-  });
+  })
 
-  const state = {
-    fields: {
-      url: '',
-    },
-    feeds: [],
-    posts: [],
-    newFeedId: '',
-    error: '',
-    parsingErrors: [],
-    addedUrls: [],
-    trackingPosts: [],
-    viewedPost: '',
-  };
-  const form = document.querySelector('form.rss-form');
-  const watchedState = onChange(state, render(state, form, i18nInstance));
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const url = formData.get('url');
-    state.fields.url = url;
+    .then(() => {
+      const state = {
+        fields: {
+          url: '',
+        },
+        feeds: [],
+        posts: [],
+        newFeedId: '',
+        error: '',
+        parsingErrors: [],
+        addedUrls: [],
+        trackingPosts: [],
+        viewedPost: '',
+      };
+      const form = document.querySelector('form.rss-form');
+      const watchedState = onChange(state, render(state, form, i18nInstance));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const url = formData.get('url');
+        state.fields.url = url;
 
-    yup.setLocale({
-      mixed: {
-        notOneOf: i18nInstance.t('errors.addedRss'),
-        default: 'field_invalid',
-      },
-      string: {
-        url: i18nInstance.t('errors.invalidUrl'),
-      },
-    });
-    const schema = yup.object().shape({
-      url: yup.string().url().nullable().notOneOf(state.addedUrls),
-    });
-    schema.validate(state.fields)
-      .then(() => {
-        const modifiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-        return axios.get(modifiedUrl);
-      })
-      .then((response) => {
-        const id = uniqueId();
-        parser(watchedState, response.data, 'new', id);
-        return id;
-      })
-      .then((id) => {
-        watchedState.newFeedId = id;
-        state.addedUrls.push(url);
-        refresh(watchedState, url, id);
-      })
-      .catch((err) => {
-        watchedState.error = err;
+        yup.setLocale({
+          mixed: {
+            notOneOf: i18nInstance.t('errors.addedRss'),
+            default: 'field_invalid',
+          },
+          string: {
+            url: i18nInstance.t('errors.invalidUrl'),
+          },
+        });
+        const schema = yup.object().shape({
+          url: yup.string().url().nullable().notOneOf(state.addedUrls),
+        });
+        schema.validate(state.fields)
+          .then(() => {
+            const modifiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+            return axios.get(modifiedUrl);
+          })
+          .then((response) => {
+            const id = uniqueId();
+            parser(watchedState, response.data, 'new', id);
+            return id;
+          })
+          .then((id) => {
+            watchedState.newFeedId = id;
+            state.addedUrls.push(url);
+            refresh(watchedState, url, id);
+          })
+          .catch((err) => {
+            watchedState.error = err;
+          });
       });
-  });
+    });
 };
