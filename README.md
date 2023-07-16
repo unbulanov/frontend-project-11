@@ -1,4 +1,4 @@
-# «RSS reader»
+# RSS reader
 
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/unbulanov/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/unbulanov/frontend-project-11/actions)
@@ -8,7 +8,7 @@
 ## Demo site [RSS aggregator](https://frontend-project-11-umber.vercel.app/)
 
 ## Description
-Simple feed aggregator, which collect RSS feeds and then watched for a new posts.
+RSS aggregator is an application that allows you to read RSS feeds from an unlimited channel at the same time. Automatically updates channel feeds every 5 seconds.
 
 ## Requirements
 Node.js v18 and higher (not tested on earlier versions)
