@@ -1,18 +1,23 @@
 export default {
   translation: {
-    feeds: 'Фиды',
-    posts: 'Посты',
-    button: 'Просмотр',
-    success: 'RSS успешно загружен',
-    errorNames: {
-      validation: 'ValidationError',
-      axios: 'AxiosError',
+    languages: {
+      ru: 'Русский',
+    },
+    titles: {
+      posts: 'Посты',
+      feeds: 'Фиды',
+    },
+    button: {
+      click: 'Просмотр',
     },
     errors: {
-      invalidUrl: 'Ссылка должна быть валидным URL',
+      fields: 'Это обязательное поле',
+      invalidURL: 'Ссылка должна быть валидным URL',
       invalidRss: 'Ресурс не содержит валидный RSS',
+      unknown: 'Что-то пошло не так',
       addedRss: 'RSS уже существует',
-      network: 'Ошибка сети',
+      networkError: 'Ошибка сети',
     },
+    successfully: 'RSS успешно загружен',
   },
 };

@@ -1,76 +1,132 @@
+/* eslint-disable no-param-reassign */
 import onChange from 'on-change';
+import 'bootstrap';
 import * as yup from 'yup';
-import i18n from 'i18next';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import i18next from 'i18next';
 import axios from 'axios';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import uniqueId from 'lodash/uniqueId';
-import ru from './locales/ru.js';
+import { uniqueId, differenceBy } from 'lodash';
+import resources from './locales/index.js';
 import render from './render.js';
-import parser from './parser.js';
-import refresh from './refresh.js';
+import parse from './parser.js';
+
+const routes = (url) => {
+  const proxyUrl = new URL('https://allorigins.hexlet.app/get');
+  proxyUrl.searchParams.set('disableCache', 'true');
+  proxyUrl.searchParams.set('url', url);
+  return proxyUrl.toString();
+};
+
+const preparingDataStorage = (data, watchedState) => {
+  const { feed, posts } = data;
+  const feedsId = uniqueId();
+  feed.id = feedsId;
+  posts.forEach((post) => {
+    post.id = uniqueId();
+    post.feedId = feed.id;
+  });
+  watchedState.feeds.push(feed);
+  watchedState.posts.push(...posts);
+};
+
+const handleError = (error) => {
+  if (error.isParseError) {
+    return 'invalidRss';
+  }
+  if (error.request) {
+    return 'networkError';
+  }
+  return error.message.key ?? 'unknown';
+};
+
+const updateRss = (watchedState) => {
+  const promises = watchedState.feeds.map((feed) => axios
+    .get(routes(feed.link))
+    .then((response) => {
+      const { posts } = parse(response.data.contents);
+      const postFromState = watchedState.posts.filter((post) => post.feedId === feed.id);
+      const newPosts = differenceBy(posts, postFromState, 'link');
+      newPosts.forEach((post) => {
+        post.id = uniqueId();
+        post.feedId = feed.id;
+      });
+      watchedState.posts.unshift(...newPosts);
+      return newPosts;
+    }));
+  Promise.all(promises).then(() => setTimeout(updateRss, 5000, watchedState));
+};
 
 export default () => {
-  const i18nInstance = i18n.createInstance();
-  i18nInstance.init({
-    lng: 'ru',
-    resources: {
-      ru,
+  yup.setLocale({
+    string: {
+      url: () => ({ key: 'invalidURL' }),
+      required: () => ({ key: 'fields' }),
     },
-  })
+    mixed: {
+      notOneOf: () => ({ key: 'addedRss' }),
+    },
+  });
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    input: document.querySelector('#url-input'),
+    submit: document.querySelector('[type="submit"]'),
+    feedback: document.querySelector('.feedback'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
+    modalHeader: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalFooter: document.querySelector('.full-article'),
+  };
 
+  const i18n = i18next.createInstance();
+  i18n
+    .init({
+      lng: 'ru',
+      resources,
+    })
     .then(() => {
       const state = {
-        fields: {
-          url: '',
+        form: {
+          status: 'filling',
+          error: null,
         },
-        feeds: [],
         posts: [],
-        newFeedId: '',
-        error: '',
-        parsingErrors: [],
-        addedUrls: [],
-        trackingPosts: [],
-        viewedPost: '',
+        feeds: [],
+        uiState: {
+          selectedPost: null,
+          viewedPost: new Set(),
+        },
       };
-      const form = document.querySelector('form.rss-form');
-      const watchedState = onChange(state, render(state, form, i18nInstance));
-      form.addEventListener('submit', (e) => {
+      const validater = (urls) => yup.string().required().url().notOneOf(urls);
+      const watchedState = onChange(state, render(state, i18n, elements));
+      elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
+        const addedLink = watchedState.feeds.map((feed) => feed.link);
+        const schema = validater(addedLink);
         const formData = new FormData(e.target);
-        const url = formData.get('url');
-        state.fields.url = url;
-
-        yup.setLocale({
-          mixed: {
-            notOneOf: i18nInstance.t('errors.addedRss'),
-            default: 'field_invalid',
-          },
-          string: {
-            url: i18nInstance.t('errors.invalidUrl'),
-          },
-        });
-        const schema = yup.object().shape({
-          url: yup.string().url().nullable().notOneOf(state.addedUrls),
-        });
-        schema.validate(state.fields)
+        const userLink = formData.get('url');
+        schema
+          .validate(userLink)
           .then(() => {
-            const modifiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-            return axios.get(modifiedUrl);
+            watchedState.form.status = 'valid';
+            watchedState.form.error = null;
+            return axios.get(routes(userLink));
           })
           .then((response) => {
-            const id = uniqueId();
-            parser(watchedState, response.data, 'new', id);
-            return id;
+            const data = parse(response.data.contents, userLink);
+            preparingDataStorage(data, watchedState);
+            watchedState.form.status = 'added';
           })
-          .then((id) => {
-            watchedState.newFeedId = id;
-            state.addedUrls.push(url);
-            refresh(watchedState, url, id);
-          })
-          .catch((err) => {
-            watchedState.error = err;
+          .catch((error) => {
+            watchedState.form.error = handleError(error);
           });
       });
+
+      elements.postsContainer.addEventListener('click', (e) => {
+        const { dataset: { id } } = e.target;
+        watchedState.uiState.viewedPost.add(id);
+        watchedState.uiState.selectedPost = id;
+      });
+
+      updateRss(watchedState);
     });
 };
