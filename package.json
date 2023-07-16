@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "RSS project",
+  "description": "RSS aggregator is an application that allows you to read RSS feeds from an unlimited channel at the same time. Automatically updates channel feeds every 5 seconds.",
   "main": "index.js",
   "scripts": {},
   "repository": {
