@@ -38,7 +38,6 @@ const preparingDataStorage = (data, watchedState) => {
   watchedState.posts.push(...posts);
 };
 
-
 const updateRss = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios
     .get(routes(feed.link))
@@ -104,16 +103,16 @@ export default () => {
         const addedLink = watchedState.feeds.map((feed) => feed.link);
         const schema = validater(addedLink);
         const formData = new FormData(e.target);
-        const userLink = formData.get('url');
+        const url = formData.get('url');
         schema
-          .validate(userLink)
+          .validate(url)
           .then(() => {
             watchedState.form.status = 'valid';
             watchedState.form.error = null;
-            return axios.get(routes(userLink));
+            return axios.get(routes(url));
           })
           .then((response) => {
-            const data = parse(response.data.contents, userLink);
+            const data = parse(response.data.contents, url);
             preparingDataStorage(data, watchedState);
             watchedState.form.status = 'added';
           })

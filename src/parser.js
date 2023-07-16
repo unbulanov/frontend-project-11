@@ -2,12 +2,10 @@ const parsePosts = (post) => {
   const title = post.querySelector('title').textContent;
   const description = post.querySelector('description').textContent;
   const link = post.querySelector('link').textContent;
-  const pubDate = post.querySelector('pubDate').textContent;
   return {
     link,
     title,
     description,
-    pubDate,
   };
 };
 
