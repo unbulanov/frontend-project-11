@@ -16,6 +16,16 @@ const routes = (url) => {
   return proxyUrl.toString();
 };
 
+const parseError = (error) => {
+  if (error.isParseError) {
+    return 'invalidRss';
+  }
+  if (error.request) {
+    return 'networkError';
+  }
+  return error.message.key ?? 'unknown';
+};
+
 const preparingDataStorage = (data, watchedState) => {
   const { feed, posts } = data;
   const feedsId = uniqueId();
@@ -28,15 +38,6 @@ const preparingDataStorage = (data, watchedState) => {
   watchedState.posts.push(...posts);
 };
 
-const handleError = (error) => {
-  if (error.isParseError) {
-    return 'invalidRss';
-  }
-  if (error.request) {
-    return 'networkError';
-  }
-  return error.message.key ?? 'unknown';
-};
 
 const updateRss = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios
@@ -67,14 +68,14 @@ export default () => {
   });
   const elements = {
     form: document.querySelector('.rss-form'),
-    input: document.querySelector('#url-input'),
     submit: document.querySelector('[type="submit"]'),
     feedback: document.querySelector('.feedback'),
-    postsContainer: document.querySelector('.posts'),
-    feedsContainer: document.querySelector('.feeds'),
+    input: document.querySelector('#url-input'),
     modalHeader: document.querySelector('.modal-title'),
     modalBody: document.querySelector('.modal-body'),
     modalFooter: document.querySelector('.full-article'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
   };
 
   const i18n = i18next.createInstance();
@@ -117,7 +118,7 @@ export default () => {
             watchedState.form.status = 'added';
           })
           .catch((error) => {
-            watchedState.form.error = handleError(error);
+            watchedState.form.error = parseError(error);
           });
       });
 
