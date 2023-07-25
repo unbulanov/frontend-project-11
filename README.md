@@ -11,7 +11,7 @@
 RSS aggregator is an application that allows you to read RSS feeds from an unlimited channel at the same time. Automatically updates channel feeds every 5 seconds.
 
 ## Requirements
-Node.js v18 and higher (not tested on earlier versions)
+Node.js v18 and higher
 
 ## How to install and serve
 ```
