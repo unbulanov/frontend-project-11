@@ -20,7 +20,7 @@ const parseError = (error) => {
   if (error.isParseError) {
     return 'invalidRss';
   }
-  if (error.request) {
+  if (error.isAxiosError) {
     return 'networkError';
   }
   return error.message.key ?? 'unknown';
@@ -51,6 +51,9 @@ const updateRss = (watchedState) => {
       });
       watchedState.posts.unshift(...newPosts);
       return newPosts;
+    })
+    .catch((e) => {
+      console.log(e.message);
     }));
   Promise.all(promises).then(() => setTimeout(updateRss, 5000, watchedState));
 };
@@ -100,8 +103,8 @@ export default () => {
       const watchedState = onChange(state, render(state, i18n, elements));
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const addedLink = watchedState.feeds.map((feed) => feed.link);
-        const schema = validater(addedLink);
+        const addedUrls = watchedState.feeds.map((feed) => feed.link);
+        const schema = validater(addedUrls);
         const formData = new FormData(e.target);
         const url = formData.get('url');
         schema
@@ -114,9 +117,10 @@ export default () => {
           .then((response) => {
             const data = parse(response.data.contents, url);
             preparingDataStorage(data, watchedState);
-            watchedState.form.status = 'added';
+            watchedState.form.status = 'filling';
           })
           .catch((error) => {
+            watchedState.form.status = 'invalid';
             watchedState.form.error = parseError(error);
           });
       });

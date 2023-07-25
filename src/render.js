@@ -143,7 +143,7 @@ const clearErrors = (elements) => {
 
 const renderStatus = (state, i18n, elements) => {
   switch (state.form.status) {
-    case 'added':
+    case 'filling':
       renderAdded(i18n, elements);
       break;
     case 'valid':
@@ -155,8 +155,13 @@ const renderStatus = (state, i18n, elements) => {
 };
 
 const renderModal = (state, elements, id) => {
-  const { modalHeader, modalBody, modalFooter } = elements;
-  const aEl = document.querySelector(`[data-id="${id}"]`);
+  const {
+    postsContainer,
+    modalHeader,
+    modalBody,
+    modalFooter,
+  } = elements;
+  const aEl = postsContainer.querySelector(`[data-id="${id}"]`);
   aEl.classList.remove('fw-bold');
   aEl.classList.add('fw-normal');
   const selectedPost = state.posts.find((post) => post.id === id);
