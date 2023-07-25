@@ -154,6 +154,13 @@ const renderStatus = (state, i18n, elements) => {
   }
 };
 
+const renderModals = (elements, id) => {
+  const { postsContainer } = elements;
+  const aEl = postsContainer.querySelector(`[data-id="${id}"]`);
+  aEl.classList.remove('fw-bold');
+  aEl.classList.add('fw-normal');
+};
+
 const renderModal = (state, elements, id) => {
   const {
     postsContainer,
@@ -161,13 +168,11 @@ const renderModal = (state, elements, id) => {
     modalBody,
     modalFooter,
   } = elements;
-  const aEl = postsContainer.querySelector(`[data-id="${id}"]`);
-  aEl.classList.remove('fw-bold');
-  aEl.classList.add('fw-normal');
   const selectedPost = state.posts.find((post) => post.id === id);
   modalHeader.textContent = selectedPost.title;
   modalBody.textContent = selectedPost.description;
   modalFooter.setAttribute('href', `${selectedPost.link}`);
+  postsContainer.append(renderModals);
 };
 
 const render = (state, i18n, elements) => (path, value) => {
